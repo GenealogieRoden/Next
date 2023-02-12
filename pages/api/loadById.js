@@ -8,7 +8,8 @@ export default function handler(req, res) {
 
   const id = req.query.id;
 
-  var url = "http://localhost:3000/api/search?id=" + id;
+  var url =
+    "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?id=" + id;
 
   fetch(url)
     .then((res) => res.json())

@@ -14,12 +14,18 @@ export default function handler(req, res) {
   const achter = req.query.last;
 
   if ((!achter || achter === undefined) && voor)
-    var url = "http://localhost:3000/api/search?voor=" + voor;
+    var url =
+      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?voor=" + voor;
   if ((!voor || voor === undefined) && achter)
-    var url = "http://localhost:3000/api/search?achter=" + achter;
+    var url =
+      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?achter=" +
+      achter;
   if (voor && achter)
     var url =
-      "http://localhost:3000/api/search?voor=" + voor + "&achter=" + achter;
+      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?voor=" +
+      voor +
+      "&achter=" +
+      achter;
 
   fetch(url)
     .then((res) => res.json())

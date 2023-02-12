@@ -9,11 +9,19 @@ export default function handler(req, res) {
   const voor = req.query.first;
   const achter = req.query.last;
 
-  if (!achter) var url = "http://localhost:3000/api/search?voor=" + voor;
-  if (!voor) var url = "http://localhost:3000/api/search?achter=" + achter;
+  if (!achter)
+    var url =
+      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?voor=" + voor;
+  if (!voor)
+    var url =
+      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?achter=" +
+      achter;
   if (voor && achter)
     var url =
-      "http://localhost:3000/api/search?voor=" + voor + "&achter=" + achter;
+      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?voor=" +
+      voor +
+      "&achter=" +
+      achter;
 
   fetch(url)
     .then((res) => res.json())

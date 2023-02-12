@@ -3,9 +3,9 @@ import fetch from "node-fetch";
 export default function handler(req, res) {
   //get query
 
-  const id1 = req.query.id;
+  const id = req.query.id;
   if (!req.query.id)
-    return res.send({ status: "error", message: "ID1 niet meegegeven" });
+    return res.send({ status: "error", message: "ID niet meegegeven" });
 
   var url =
     "https://GenealogieRodenAPI.daanschenkel.repl.co/api/getRelatie?id=" + id;

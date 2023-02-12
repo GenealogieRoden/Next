@@ -11,6 +11,7 @@ export default function Home() {
   const [data, setData] = useState([]);
   const [moederData, setMoederData] = useState([]);
   const [vaderData, setVaderData] = useState([]);
+  const [relatieData, setRelatieData] = useState([]);
   const router = useRouter();
   if (typeof window !== "undefined") {
     if (sessionStorage.getItem("refresh") == "true") {
@@ -41,7 +42,12 @@ export default function Home() {
             return router.back();
           }
           setData(data);
-
+          fetch("/api/getRelatie?id=" + id)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) return;
+              setRelatieData(data);
+            });
           if (data[0].verwijzingmoeder) {
             fetch("/api/loadById?id=" + data[0].verwijzingmoeder)
               .then((response) => response.json())
@@ -254,6 +260,34 @@ export default function Home() {
                       <p></p>
                     )}
                   </p>
+                  {relatieData.length > 0 ? (
+                    <p>
+                      {relatieData.map((item) => (
+                        <div>
+                          <br></br>
+                          <Link
+                            href={"/persoon?id=" + item.relatie1}
+                            onClick={() => {
+                              location = "/persoon?id=" + item.relatie1;
+                            }}
+                          >
+                            {item.relatie1}
+                          </Link>
+                          <br></br>
+                          <Link
+                            href={"/persoon?id=" + item.relatie2}
+                            onClick={() => {
+                              location = "/persoon?id=" + item.relatie2;
+                            }}
+                          >
+                            {item.relatie2}
+                          </Link>
+                        </div>
+                      ))}
+                    </p>
+                  ) : (
+                    <p></p>
+                  )}
                 </div>
                 <br></br>
                 <div class="px-4 py-2"></div>

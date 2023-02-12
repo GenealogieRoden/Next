@@ -81,6 +81,12 @@ export default function Home() {
             router.push("/multiple?first=" + first + "&last=" + last);
           }
           setData(data);
+          fetch("/api/getRelatie?id=" + data[0].id)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) return;
+              setRelatieData(data);
+            });
           if (data[0].verwijzingmoeder) {
             fetch("/api/loadById?id=" + data[0].verwijzingmoeder)
               .then((response) => response.json())

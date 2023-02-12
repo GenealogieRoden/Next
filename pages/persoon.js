@@ -8,10 +8,10 @@ import { useState } from "react";
 import { useEffect } from "react";
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
+  const [persoon, setPersoon] = useState([]);
   const [moederData, setMoederData] = useState([]);
   const [vaderData, setVaderData] = useState([]);
-  const [relatieData, setRelatieData] = useState([]);
+  const [relatieData, setRelatieData] = useState(null);
   const router = useRouter();
   if (typeof window !== "undefined") {
     if (sessionStorage.getItem("refresh") == "true") {
@@ -32,7 +32,7 @@ export default function Home() {
     const last = router.query[queryKey2];
     const id = router.query[queryKey3];
 
-    if (!first && !last && id) {
+    if (id) {
       var url = "/api/loadById?id=" + id;
       fetch(url)
         .then((response) => response.json())
@@ -41,13 +41,10 @@ export default function Home() {
             alert("Persoon niet gevonden.");
             return router.back();
           }
-          setData(data);
-          fetch("/api/getRelatie?id=" + id)
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.error) return;
-              setRelatieData(data);
-            });
+          setPersoon(data);
+          console.log("Got persoon data");
+          console.log(persoon);
+
           if (data[0].verwijzingmoeder) {
             fetch("/api/loadById?id=" + data[0].verwijzingmoeder)
               .then((response) => response.json())
@@ -70,8 +67,34 @@ export default function Home() {
             setLoading(false);
           }
           setLoading(false);
+          fetch("/api/getRelatie?id=" + id)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) return;
+              console.log("GOT RELATIE DATA");
+              console.log(persoon);
+              setRelatieData(data);
+
+              if (data[0].relatie1 === id) {
+                console.log(data[0].relatie1);
+                fetch("/api/loadById?id=" + data[0].relatie2)
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (!data.error) if (data.length > 0) setRelatieData(data);
+                  });
+              }
+              if (data[0].relatie2 === id) {
+                console.log(data[0].relatie2);
+                fetch("/api/loadById?id=" + data[0].relatie1)
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (!data.error) if (data.length > 0) setRelatieData(data);
+                  });
+              }
+            });
         });
-    } else {
+    }
+    if (!id && first && last) {
       var url = "/api/list?first=" + first + "&last=" + last;
       fetch(url)
         .then((response) => response.json())
@@ -80,35 +103,7 @@ export default function Home() {
           if (data.length > 1) {
             router.push("/multiple?first=" + first + "&last=" + last);
           }
-          setData(data);
-          fetch("/api/getRelatie?id=" + data[0].id)
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.error) return;
-              setRelatieData(data);
-            });
-          if (data[0].verwijzingmoeder) {
-            fetch("/api/loadById?id=" + data[0].verwijzingmoeder)
-              .then((response) => response.json())
-              .then((data) => {
-                console.log(data);
-                if (!data.error) if (data.length > 0) setMoederData(data[0]);
-                setLoading(false);
-              });
-          }
-          if (data[0].verwijzingvader) {
-            fetch("/api/loadById?id=" + data[0].verwijzingvader)
-              .then((response) => response.json())
-              .then((data) => {
-                console.log(data);
-                if (!data.error) if (data.length > 0) setVaderData(data[0]);
-
-                setLoading(false);
-              });
-          }
-          if (data.verwijzingmoeder == "" && data.verwijzingvader == "") {
-            setLoading(false);
-          }
+          location = "/persoon?id=" + data[0].id;
         });
     }
   }, [router.isReady, router.pathname]);
@@ -159,7 +154,7 @@ export default function Home() {
           Resultaat
         </h1>
         <p>
-          {data.length > 1 ? (
+          {persoon.length > 1 ? (
             <span>
               Er zijn meerdere resultaten gevonden voor {router.query.voor}{" "}
               {router.query.achter}
@@ -171,7 +166,7 @@ export default function Home() {
         <br></br>
         <div class="grid grid-cols-1 gap-4">
           <div class="shadow-md rounded-lg overflow-hidden">
-            {data.map((item) => (
+            {persoon.map((item) => (
               <div>
                 <div class="px-4 py-2 ">
                   <h1 class="text-white-900 font-bold text-2xl">
@@ -182,6 +177,11 @@ export default function Home() {
                     <p class="text-white-600 text-sm">
                       Roepnaam: {item.roepnaam}
                     </p>
+                  ) : (
+                    <p></p>
+                  )}
+                  {item.opmerking1 != "" ? (
+                    <p class="text-white-600 text-sm">{item.opmerking1}</p>
                   ) : (
                     <p></p>
                   )}
@@ -209,19 +209,15 @@ export default function Home() {
                     ""
                   )}
                   <h1 class="text-white-900 font-bold text-2xl">
-                    {(item.verwijzingmoeder !== "0" &&
-                      moederData.voornaam !== undefined) ||
-                    (item.verwijzingvader !== "0" &&
-                      vaderData.voornaam !== undefined)
+                    {item.verwijzingmoeder !== "0" ||
+                    item.verwijzingvader !== "0"
                       ? "Ouders"
                       : ""}
                   </h1>
                   <p>
-                    {(item.verwijzingvader !== "0" &&
-                      vaderData.voornaam === undefined) ||
-                    (item.verwijzingmoeder !== "0" &&
-                      moederData.voornaam === undefined) ? (
-                      <p>Data laden...</p>
+                    {item.verwijzingvader !== "0" &&
+                    vaderData.voornaam === undefined ? (
+                      <p>Vader laden...</p>
                     ) : (
                       <p></p>
                     )}{" "}
@@ -248,6 +244,12 @@ export default function Home() {
                       <p></p>
                     )}{" "}
                     {item.verwijzingmoeder !== "0" &&
+                    moederData.voornaam === undefined ? (
+                      <p>Moeder laden...</p>
+                    ) : (
+                      <p></p>
+                    )}
+                    {item.verwijzingmoeder !== "0" &&
                     moederData.voornaam !== undefined ? (
                       <Link
                         href={"/persoon?id=" + item.verwijzingmoeder}
@@ -266,31 +268,32 @@ export default function Home() {
                       <p></p>
                     )}
                   </p>
-                  {relatieData.length > 0 ? (
-                    <p>
-                      {relatieData.map((item) => (
-                        <div>
-                          <br></br>
-                          <Link
-                            href={"/persoon?id=" + item.relatie1}
-                            onClick={() => {
-                              location = "/persoon?id=" + item.relatie1;
-                            }}
-                          >
-                            {item.relatie1}
-                          </Link>
-                          <br></br>
-                          <Link
-                            href={"/persoon?id=" + item.relatie2}
-                            onClick={() => {
-                              location = "/persoon?id=" + item.relatie2;
-                            }}
-                          >
-                            {item.relatie2}
-                          </Link>
-                        </div>
-                      ))}
-                    </p>
+                  {relatieData !== null ? (
+                    <div>
+                      <br></br>
+                      <h1 class="text-white-900 font-bold text-2xl">
+                        {relatieData[0].geslacht === "m" ? "Echtgenoot" : ""}
+                        {relatieData[0].geslacht === "v" ? "Echtgenote" : ""}
+                        {relatieData[0].geslacht !== "m" &&
+                        relatieData[0].geslacht !== "v"
+                          ? "Partner"
+                          : ""}
+                      </h1>
+                      {!relatieData[0].voornaam ? "Partner laden..." : ""}
+
+                      <Link
+                        href={"/persoon?id=" + relatieData[0].id}
+                        onClick={() => {
+                          location = "/persoon?id=" + relatieData[0].id;
+                        }}
+                      >
+                        {relatieData[0].voornaam}{" "}
+                        {relatieData[0].roepnaam
+                          ? ` (${relatieData[0].roepnaam}) `
+                          : ""}{" "}
+                        {relatieData[0].voorvoegsel} {relatieData[0].achternaam}{" "}
+                      </Link>
+                    </div>
                   ) : (
                     <p></p>
                   )}

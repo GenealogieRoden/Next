@@ -12,6 +12,8 @@ export default function Home() {
   const [moederData, setMoederData] = useState([]);
   const [vaderData, setVaderData] = useState([]);
   const [relatieData, setRelatieData] = useState(null);
+  const [kinderenData, setKinderenData] = useState(null);
+  const [siblingsData, setSiblingsData] = useState([]);
   const router = useRouter();
   if (typeof window !== "undefined") {
     if (sessionStorage.getItem("refresh") == "true") {
@@ -44,6 +46,26 @@ export default function Home() {
           setPersoon(data);
           console.log("Got persoon data");
           console.log(persoon);
+          fetch("/api/getKinderen?id=" + id)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) return;
+              console.log("GOT KINDEREN DATA");
+              if (data.length > 0) {
+                setKinderenData(data);
+                console.log(data);
+              }
+            });
+          fetch("/api/getSiblings?id=" + id)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) return;
+              console.log("GOT SIBLINGS DATA");
+              if (data.length > 0) {
+                setSiblingsData(data);
+                console.log(data);
+              }
+            });
 
           if (data[0].verwijzingmoeder) {
             fetch("/api/loadById?id=" + data[0].verwijzingmoeder)
@@ -293,6 +315,55 @@ export default function Home() {
                           : ""}{" "}
                         {relatieData[0].voorvoegsel} {relatieData[0].achternaam}{" "}
                       </Link>
+                    </div>
+                  ) : (
+                    <p></p>
+                  )}
+                  {siblingsData.length !== 0 ? (
+                    <div>
+                      <br></br>
+                      <h1 class="text-white-900 font-bold text-2xl">
+                        Broers en zussen
+                      </h1>
+                    </div>
+                  ) : (
+                    <p></p>
+                  )}
+                  {siblingsData.map((item) => (
+                    <div>
+                      <Link
+                        href={"/persoon?id=" + item.id}
+                        onClick={() => {
+                          location = "/persoon?id=" + item.id;
+                        }}
+                      >
+                        {item.voornaam}{" "}
+                        {item.roepnaam ? ` (${item.roepnaam}) ` : ""}{" "}
+                        {item.voorvoegsel} {item.achternaam}{" "}
+                      </Link>
+                    </div>
+                  ))}
+                  {kinderenData !== null ? (
+                    <div>
+                      <br></br>
+                      <h1 class="text-white-900 font-bold text-2xl">
+                        Kinderen
+                      </h1>
+
+                      {kinderenData.map((item) => (
+                        <div>
+                          <Link
+                            href={"/persoon?id=" + item.id}
+                            onClick={() => {
+                              location = "/persoon?id=" + item.id;
+                            }}
+                          >
+                            {item.voornaam}{" "}
+                            {item.roepnaam ? ` (${item.roepnaam}) ` : ""}{" "}
+                            {item.voorvoegsel} {item.achternaam}{" "}
+                          </Link>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <p></p>

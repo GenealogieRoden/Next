@@ -4,5 +4,7 @@
   "/_document": "pages/_document.js",
   "/persoon": "pages/persoon.js",
   "/api/loadById": "pages/api/loadById.js",
+  "/api/getKinderen": "pages/api/getKinderen.js",
+  "/api/getSiblings": "pages/api/getSiblings.js",
   "/api/getRelatie": "pages/api/getRelatie.js"
 }

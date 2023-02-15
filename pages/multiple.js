@@ -88,7 +88,7 @@ export default function Home() {
           Resultaat
         </h1>
         <p>
-          Er zijn meerdere resultaten gevonden. Klik op een van de resultaten om
+          Er zijn {data.length} resultaten gevonden. Klik op een van de resultaten om
           verder te gaan.
         </p>
         <br></br>

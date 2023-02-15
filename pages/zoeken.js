@@ -43,7 +43,25 @@ export default function Home() {
             class="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
             id="last"
             type="text"
-            placeholder="Achternaam"
+            placeholder="Achternaam (geen tussenvoegsels)"
+          ></input>
+          <input
+            class="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
+            id="birth"
+            type="number"
+            placeholder="Geboortejaar"
+            onChange={(e) => {
+              //make correct if birthyear is incorrect or in the future
+              if (e.target.value > new Date().getFullYear()) {
+                e.target.value = new Date().getFullYear();
+              }
+              if (e.target.value < 0) {
+                e.target.value = 0;
+              }
+              if (e.target.value.length > 4) {
+                e.target.value = e.target.value.substring(0, 4);
+              }
+            }}
           ></input>
         </div>
 
@@ -53,7 +71,14 @@ export default function Home() {
           onClick={() => {
             var first = document.getElementById("first").value;
             var last = document.getElementById("last").value;
-            var url = "/api/search?first=" + first + "&last=" + last;
+            var birth = document.getElementById("birth").value;
+            var url =
+              "/api/search?first=" +
+              first +
+              "&last=" +
+              last +
+              "&birth=" +
+              birth;
 
             fetch(url)
               .then((response) => response.json())
@@ -65,9 +90,19 @@ export default function Home() {
                 if (data.status === "error") {
                   if (data.message === "Multiple results found.") {
                     //redirect to the link
-                    router.push("/multiple?first=" + first + "&last=" + last);
+                    var firstURL = "";
+                    if (first) var firstURL = "first=" + first;
+                    var lastURL = "";
+                    if (last) var lastURL = "last=" + last;
+                    var birthURL = "";
+                    if (birth) var birthURL = "birth=" + birth;
+                    router.push(
+                      "/multiple?" + firstURL + "&" + lastURL + "&" + birthURL
+                    );
                   } else if (data.message === "No results found.") {
-                    alert("Geen resultaten gevonden.");
+                    alert(
+                      "Er zijn geen resultaten gevonden voor deze zoekopdracht. Probeer minder specifieke zoektermen te gebruiken."
+                    );
                   } else {
                     alert(data.message);
                   }

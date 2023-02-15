@@ -14,6 +14,7 @@ export default function Home() {
   const [relatieData, setRelatieData] = useState(null);
   const [kinderenData, setKinderenData] = useState(null);
   const [siblingsData, setSiblingsData] = useState([]);
+  const [referentieData, setReferentieData] = useState(null);
   const router = useRouter();
   if (typeof window !== "undefined") {
     if (sessionStorage.getItem("refresh") == "true") {
@@ -30,9 +31,11 @@ export default function Home() {
     const queryKey1 = "voor";
     const queryKey2 = "achter";
     const queryKey3 = "id";
+    const queryKey4 = "birth";
     const first = router.query[queryKey1];
     const last = router.query[queryKey2];
     const id = router.query[queryKey3];
+    const birth = router.query[queryKey4];
 
     if (id) {
       var url = "/api/loadById?id=" + id;
@@ -46,6 +49,17 @@ export default function Home() {
           setPersoon(data);
           console.log("Got persoon data");
           console.log(persoon);
+          setLoading(false);
+          fetch("/api/getReferentie?id=" + id)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) return;
+              console.log("GOT REFERENTIE DATA");
+              if (!data.referentie) return;
+              setReferentieData(data);
+              console.log(data);
+            });
+
           fetch("/api/getKinderen?id=" + id)
             .then((response) => response.json())
             .then((data) => {
@@ -88,7 +102,6 @@ export default function Home() {
           if (data.verwijzingmoeder == "" && data.verwijzingvader == "") {
             setLoading(false);
           }
-          setLoading(false);
           fetch("/api/getRelatie?id=" + id)
             .then((response) => response.json())
             .then((data) => {
@@ -116,16 +129,29 @@ export default function Home() {
             });
         });
     }
-    if (!id && first && last) {
-      var url = "/api/list?first=" + first + "&last=" + last;
+    if (!id) {
+      if (first == undefined && last == undefined && birth == undefined) return;
+      var firstURL = "";
+      var lastURL = "";
+      var birthURL = "";
+      console.log("first: " + first + " last: " + last + " birth: " + birth);
+      if (first !== undefined) var firstURL = "first=" + first;
+      if (last !== undefined) var lastURL = "last=" + last;
+      if (birth !== undefined) var birthURL = "birth=" + birth;
+      var url = "/api/search?" + firstURL + "&" + lastURL + "&" + birthURL;
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
+          if (data.link) {
+            return (location = data.link);
+          }
           if (data.length < 1) return;
           if (data.length > 1) {
             router.push("/multiple?first=" + first + "&last=" + last);
           }
-          location = "/persoon?id=" + data[0].id;
+          if (data.length == 1) {
+            location = "/persoon?id=" + data[0].id;
+          }
         });
     }
   }, [router.isReady, router.pathname]);
@@ -368,7 +394,26 @@ export default function Home() {
                   ) : (
                     <p></p>
                   )}
+                  {referentieData !== null ? (
+                    <div>
+                      <br></br>
+                      <h1 class="text-white-900 font-bold text-m">
+                        Referentie
+                      </h1>
+                      <p>{referentieData.referentie}</p>
+                      <p>{referentieData.extra}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <br></br>
+                      <h1 class="text-white-900 font-bold text-m">
+                        Referentie
+                      </h1>
+                      <p>Referentie onbekend.</p>
+                    </div>
+                  )}
                 </div>
+
                 <br></br>
                 <div class="px-4 py-2"></div>
               </div>

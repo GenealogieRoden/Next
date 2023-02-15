@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 export default function handler(req, res) {
   //get query
 
-  if (!req.query.first && !req.query.last) {
+  if (!req.query.first && !req.query.last && !req.query.birth) {
     return res.send({
       status: "error",
       message: "Geen voor of achternaam ingevuld.",
@@ -12,20 +12,23 @@ export default function handler(req, res) {
 
   const voor = req.query.first;
   const achter = req.query.last;
-
-  if ((!achter || achter === undefined) && voor)
-    var url =
-      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?voor=" + voor;
-  if ((!voor || voor === undefined) && achter)
-    var url =
-      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?achter=" +
-      achter;
-  if (voor && achter)
-    var url =
-      "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?voor=" +
-      voor +
-      "&achter=" +
-      achter;
+  const birth = req.query.birth;
+  var voorURL = "";
+  var achterURL = "";
+  var birthURL = "";
+  if (voor && voor !== undefined && voor !== "undefined")
+    var voorURL = "voor=" + voor;
+  if (achter && achter !== undefined && achter !== "undefined")
+    var achterURL = "achter=" + achter;
+  if (birth && birth !== undefined && achter !== "undefined")
+    var birthURL = "birth=" + birth;
+  var url =
+    "https://GenealogieRodenAPI.daanschenkel.repl.co/api/search?" +
+    voorURL +
+    "&" +
+    achterURL +
+    "&" +
+    birthURL;
 
   fetch(url)
     .then((res) => res.json())

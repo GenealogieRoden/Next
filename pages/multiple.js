@@ -22,16 +22,29 @@ export default function Home() {
 
     const queryKey1 = "first";
     const queryKey2 = "last";
+    const queryKey3 = "birth";
 
     const first = router.query[queryKey1];
     const last = router.query[queryKey2];
+    const birth = router.query[queryKey3];
 
-    var url = "/api/list?first=" + first + "&last=" + last;
+    var firstURL = "";
+    var lastURL = "";
+    var birthURL = "";
+    if (first !== undefined) var firstURL = "&first=" + first;
+    if (last !== undefined) var lastURL = "&last=" + last;
+    if (birth !== undefined) var birthURL = "&birth=" + birth;
+
+    var url = "/api/list?" + firstURL + lastURL + birthURL;
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setData(data);
-        setLoading(false);
+        if (data.status == "error") {
+          router.push("/persoon?" + firstURL + lastURL + birthURL);
+        } else {
+          setData(data);
+          setLoading(false);
+        }
       });
   }, [router.isReady]);
 

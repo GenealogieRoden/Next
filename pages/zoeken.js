@@ -30,6 +30,13 @@ export default function Home() {
       >
         Zoeken
       </h1>
+      <p>
+        Let op: Er zit op dit moment ergens een bug waardoor alle waardes na een
+        bepaald aantal karakters wordt afgekapt. Dit is een bekend probleem en
+        wordt opgelost. Indien u een persoon niet kunt vinden, probeer dan de
+        zoektermen te verkorten of op achternaam/geboortejaar te zoeken,
+        bedankt!
+      </p>
       <br></br>
       <form>
         <div class="mb-4">
